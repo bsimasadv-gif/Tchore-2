@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tchore - Tênis de Mesa</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f1f7f2;color:#20352a;margin:0}
+header{background:#16834b;color:white;padding:25px;text-align:center}
+main{max-width:700px;margin:auto;padding:15px}
+section{background:white;padding:18px;border-radius:12px;margin:15px 0}
+input,button{box-sizing:border-box;width:100%;padding:12px;margin:6px 0;border-radius:8px;font-size:16px}
+input{border:1px solid #ccd8cf}
+button{background:#16834b;color:white;border:0;font-weight:bold}
+.del{background:#b42318}
+.event{border:1px solid #dce7de;border-radius:10px;padding:12px;margin:12px 0}
+</style>
+</head>
+<body>
+<header>
+<h1>🏓 Tchore</h1>
+<p>Seu espaço para torneios de tênis de mesa</p>
+</header>
+<main>
+<section>
+<h2>🏆 Criar torneio</h2>
+<form id="criar">
+<input id="nome" placeholder="Nome do torneio" required>
+<input id="local" placeholder="Local do torneio" required>
+<input id="data" type="date" required>
+<button type="submit">Criar torneio</button>
+</form>
+</section>
+<section>
+<h2>📋 Torneios disponíveis</h2>
+<div id="lista"></div>
+</section>
+</main>
+<script>
+let torneios=[];
+try{torneios=JSON.parse(localStorage.getItem("tchore")||"[]")}catch(e){}
+function salvar(){localStorage.setItem("tchore",JSON.stringify(torneios));mostrar()}
+function mostrar(){
+let lista=document.getElementById("lista");lista.replaceChildren();
+if(!torneios.length){lista.textContent="Nenhum torneio cadastrado.";return}
+torneios.forEach((t,i)=>{
+let d=document.createElement("div");d.className="event";
+let h=document.createElement("h3");h.textContent=t.nome;d.append(h);
+let p=document.createElement("p");p.textContent="📍 "+t.local+" | 📅 "+t.data;d.append(p);
+let f=document.createElement("form");
+let n=document.createElement("input");n.placeholder="Nome do atleta";n.required=true;
+let c=document.createElement("input");c.placeholder="Telefone ou e-mail";c.required=true;
+let b=document.createElement("button");b.textContent="Inscrever atleta";
+f.append(n,c,b);
+f.onsubmit=e=>{e.preventDefault();t.inscritos.push({nome:n.value,contato:c.value});salvar()};
+d.append(f);
+let v=document.createElement("button");v.textContent="Ver inscritos ("+t.inscritos.length+")";
+v.onclick=()=>alert(t.inscritos.length?t.inscritos.map(a=>a.nome+" — "+a.contato).join("\n"):"Nenhum inscrito");
+d.append(v);
+let x=document.createElement("button");x.textContent="Excluir torneio";x.className="del";
+x.onclick=()=>{if(confirm("Excluir este torneio?")){torneios.splice(i,1);salvar()}};
+d.append(x);lista.append(d)
+})
+}
+document.getElementById("criar").onsubmit=e=>{
+e.preventDefault();
+torneios.unshift({nome:document.getElementById("nome").value,local:document.getElementById("local").value,data:document.getElementById("data").value,inscritos:[]});
+e.target.reset();salvar()
+};
+torneios.forEach(t=>{if(!Array.isArray(t.inscritos))t.inscritos=[]});
+mostrar();
+</script>
+</body>
+</html>
